@@ -1,9 +1,9 @@
 import { Request, Response } from 'express';
-import { JsonDB } from '../storage/json_db.js';
+import { getDatabaseAdapter } from '../storage/DatabaseService.js';
 import { FormTemplate, FormSubmission } from '../../../shared/types/index.js';
 
-const dbTemplates = new JsonDB<FormTemplate>('templates.json');
-const dbSubmissions = new JsonDB<FormSubmission>('submissions.json');
+const dbTemplates = getDatabaseAdapter<FormTemplate>('templates');
+const dbSubmissions = getDatabaseAdapter<FormSubmission>('submissions');
 
 export const getTemplates = async (req: Request, res: Response) => {
   try {

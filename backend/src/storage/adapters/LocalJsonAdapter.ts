@@ -34,7 +34,9 @@ export async function writeJson<T>(filename: string, data: T): Promise<void> {
   await fs.rename(tempFilePath, filePath);
 }
 
-export class JsonDB<T extends { id: string }> {
+import { StorageAdapter } from '../StorageAdapter.js';
+
+export class LocalJsonAdapter<T extends { id: string }> implements StorageAdapter<T> {
   private filename: string;
 
   constructor(filename: string) {

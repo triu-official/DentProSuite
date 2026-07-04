@@ -1,8 +1,8 @@
 import { Request, Response } from 'express';
-import { JsonDB } from '../storage/json_db.js';
+import { getDatabaseAdapter } from '../storage/DatabaseService.js';
 import { Appointment } from '../../../shared/types/index.js';
 
-const dbAppointments = new JsonDB<Appointment>('appointments.json');
+const dbAppointments = getDatabaseAdapter<Appointment>('appointments');
 
 // Simplified simulated billing/revenue computation
 // We'll calculate revenue based on completed appointments

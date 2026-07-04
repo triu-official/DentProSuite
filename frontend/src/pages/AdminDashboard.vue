@@ -40,14 +40,20 @@ const showBuilder = ref(false);
 
 const fetchRevenue = async () => {
   try {
-    const res = await fetch(`http://localhost:3001/api/billing/overview?startDate=2023-01-01&endDate=2099-12-31`, {
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/billing/overview?startDate=2023-01-01&endDate=2099-12-31`, {
       headers: { Authorization: `Bearer ${authStore.token}` }
     });
     if (res.ok) {
       revenue.value = await res.json();
+      await import('../services/offlineStorage.js').then(m => m.cacheData('admin_revenue', revenue.value));
     }
   } catch (error) {
-    //
+      await import('../services/offlineStorage.js').then(async m => {
+          const cached = await m.getCachedData('admin_revenue');
+          if (cached) {
+              revenue.value = cached;
+          }
+      });
   }
 };
 

@@ -1,6 +1,6 @@
 import bcrypt from 'bcrypt';
 import path from 'path';
-import { JsonDB } from '../storage/json_db.js';
+import { getDatabaseAdapter } from '../storage/DatabaseService.js';
 import { User, Clinic, Patient, FormTemplate, Appointment } from '../../../shared/types/index.js';
 
 // Hardcoded for testing; adjust path if run from a different CWD
@@ -10,11 +10,11 @@ const DATA_DIR = path.join(process.cwd(), '../data');
 async function seed() {
   console.log('Seeding data...');
 
-  const dbUsers = new JsonDB<User>('users.json');
-  const dbClinics = new JsonDB<Clinic>('clinics.json');
-  const dbPatients = new JsonDB<Patient>('patients.json');
-  const dbTemplates = new JsonDB<FormTemplate>('templates.json');
-  const dbAppointments = new JsonDB<Appointment>('appointments.json');
+  const dbUsers = getDatabaseAdapter<User>('users');
+  const dbClinics = getDatabaseAdapter<Clinic>('clinics');
+  const dbPatients = getDatabaseAdapter<Patient>('patients');
+  const dbTemplates = getDatabaseAdapter<FormTemplate>('templates');
+  const dbAppointments = getDatabaseAdapter<Appointment>('appointments');
 
   // Password hashing
   const salt = await bcrypt.genSalt(10);

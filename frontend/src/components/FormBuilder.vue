@@ -57,7 +57,7 @@ const addField = () => {
 
 const saveTemplate = async () => {
   try {
-    const res = await fetch('http://localhost:3001/api/forms/templates', {
+    const res = await fetch(import.meta.env.VITE_API_URL + '/api/forms/templates', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

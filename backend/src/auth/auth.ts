@@ -1,14 +1,15 @@
 import jwt from 'jsonwebtoken';
-
-const JWT_SECRET = process.env.JWT_SECRET || 'super-secret-local-dev-key';
+import { getEnv } from '../utils/env.js';
 
 export function generateToken(payload: object, expiresIn = '1d') {
-  return jwt.sign(payload, JWT_SECRET, { expiresIn });
+  const env = getEnv();
+  return jwt.sign(payload, env.JWT_SECRET, { expiresIn });
 }
 
 export function verifyToken(token: string) {
+  const env = getEnv();
   try {
-    return jwt.verify(token, JWT_SECRET);
+    return jwt.verify(token, env.JWT_SECRET);
   } catch (err) {
     return null;
   }

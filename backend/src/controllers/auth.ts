@@ -1,10 +1,10 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcrypt';
-import { JsonDB } from '../storage/json_db.js';
+import { getDatabaseAdapter } from '../storage/DatabaseService.js';
 import { User } from '../../../shared/types/index.js';
 import { generateToken } from '../auth/auth.js';
 
-const dbUsers = new JsonDB<User>('users.json');
+const dbUsers = getDatabaseAdapter<User>('users');
 
 export const login = async (req: Request, res: Response) => {
   try {

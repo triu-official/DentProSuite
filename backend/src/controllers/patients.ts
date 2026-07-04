@@ -1,9 +1,9 @@
 import { Request, Response } from 'express';
-import { JsonDB } from '../storage/json_db.js';
+import { getDatabaseAdapter } from '../storage/DatabaseService.js';
 import { Patient } from '../../../shared/types/index.js';
 
 
-const dbPatients = new JsonDB<Patient>('patients.json');
+const dbPatients = getDatabaseAdapter<Patient>('patients');
 
 export const getPatients = async (req: Request, res: Response) => {
   try {

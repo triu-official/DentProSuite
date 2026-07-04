@@ -1,8 +1,8 @@
 import { Request, Response } from 'express';
-import { JsonDB } from '../storage/json_db.js';
+import { getDatabaseAdapter } from '../storage/DatabaseService.js';
 import { Appointment } from '../../../shared/types/index.js';
 
-const dbAppointments = new JsonDB<Appointment>('appointments.json');
+const dbAppointments = getDatabaseAdapter<Appointment>('appointments');
 
 export const getAppointments = async (req: Request, res: Response) => {
   try {

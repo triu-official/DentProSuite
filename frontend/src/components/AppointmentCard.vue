@@ -52,7 +52,7 @@ const statusColor = computed(() => {
 
 const updateStatus = async () => {
   try {
-    const res = await fetch(`http://localhost:3001/api/appointments/${props.appointment.id}`, {
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/appointments/${props.appointment.id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',

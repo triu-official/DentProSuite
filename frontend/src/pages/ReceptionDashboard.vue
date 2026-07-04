@@ -44,7 +44,7 @@ const loadAppointments = () => {
 
 const updateStatus = async (id: string, status: string) => {
   try {
-    const res = await fetch(`http://localhost:3001/api/appointments/${id}`, {
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/appointments/${id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',

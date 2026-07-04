@@ -1,55 +1,113 @@
 import { openDB } from 'idb';
-import type { FormSubmission } from '../../../shared/types/index.js';
+import type { DBSchema, IDBPDatabase } from 'idb';
+
+interface SyncQueueItem {
+  id?: number;
+  url: string;
+  method: string;
+  body: any;
+  headers?: any;
+  timestamp: number;
+}
+
+interface DentistPwaDB extends DBSchema {
+  'sync-queue': {
+    key: number;
+    value: SyncQueueItem;
+  };
+  'cached-data': {
+    key: string;
+    value: { id: string; data: any; updated_at: number };
+  };
+}
 
 const DB_NAME = 'dentist-pwa-db';
-const STORE_NAME = 'offline-submissions';
 
-export async function initDB() {
-  return openDB(DB_NAME, 1, {
-    upgrade(db) {
-      if (!db.objectStoreNames.contains(STORE_NAME)) {
-        db.createObjectStore(STORE_NAME, { keyPath: 'id', autoIncrement: true });
+export async function initDB(): Promise<IDBPDatabase<DentistPwaDB>> {
+  return openDB<DentistPwaDB>(DB_NAME, 2, {
+    upgrade(db, oldVersion) {
+      if (oldVersion < 1 || !db.objectStoreNames.contains('sync-queue' as any)) {
+        if (db.objectStoreNames.contains('offline-submissions' as any)) {
+          db.deleteObjectStore('offline-submissions' as any);
+        }
+        db.createObjectStore('sync-queue', { keyPath: 'id', autoIncrement: true });
+        db.createObjectStore('cached-data', { keyPath: 'id' });
       }
     }
   });
 }
 
-export async function saveOfflineSubmission(submission: FormSubmission) {
+// ------------------------------------------------------------------
+// Caching Layer (Read Offline)
+// ------------------------------------------------------------------
+export async function cacheData(key: string, data: any) {
   const db = await initDB();
-  await db.add(STORE_NAME, submission);
+  await db.put('cached-data', { id: key, data, updated_at: Date.now() });
 }
 
-export async function getOfflineSubmissions() {
+export async function getCachedData(key: string) {
   const db = await initDB();
-  return db.getAll(STORE_NAME);
+  const entry = await db.get('cached-data', key);
+  return entry ? entry.data : null;
 }
 
-export async function removeOfflineSubmission(id: number | string) {
+// ------------------------------------------------------------------
+// Sync Queue Layer (Write Offline)
+// ------------------------------------------------------------------
+export async function queueSyncRequest(url: string, method: string, body: any, headers: any = {}) {
   const db = await initDB();
-  await db.delete(STORE_NAME, id);
+  await db.add('sync-queue', {
+    url,
+    method,
+    body,
+    headers,
+    timestamp: Date.now()
+  });
+
+  // Attempt sync immediately if online
+  if (navigator.onLine) {
+    syncQueue();
+  }
 }
 
-export async function syncOfflineSubmissions() {
-  const submissions = await getOfflineSubmissions();
-  if (submissions.length === 0) return;
+export async function getSyncQueue() {
+  const db = await initDB();
+  return db.getAll('sync-queue');
+}
 
-  for (const sub of submissions) {
+export async function clearSyncQueueItem(id: number) {
+  const db = await initDB();
+  await db.delete('sync-queue', id);
+}
+
+export async function syncQueue() {
+  const items = await getSyncQueue();
+  if (items.length === 0) return;
+
+  for (const item of items) {
     try {
-      const res = await fetch('http://localhost:3001/api/forms/submissions', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(sub)
+      const res = await fetch(item.url, {
+        method: item.method,
+        headers: {
+          'Content-Type': 'application/json',
+          ...(item.headers || {})
+        },
+        body: JSON.stringify(item.body)
       });
 
-      if (res.ok) {
-        await removeOfflineSubmission(sub.id as string);
+      if (res.ok || res.status >= 400) {
+        // If it succeeds or permanently fails (e.g., 400 Bad Request), remove from queue.
+        if (item.id) {
+          await clearSyncQueueItem(item.id);
+        }
       }
     } catch (err) {
+      // Network error, keep in queue and break.
       break;
     }
   }
 }
 
 if (typeof window !== 'undefined') {
-  window.addEventListener('online', syncOfflineSubmissions);
+  window.addEventListener('online', syncQueue);
 }

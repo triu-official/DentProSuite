@@ -1,5 +1,6 @@
 import express from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
 import dotenv from 'dotenv';
 
 import authRoutes from './routes/auth.js';
@@ -7,14 +8,22 @@ import patientRoutes from './routes/patients.js';
 import appointmentRoutes from './routes/appointments.js';
 import formRoutes from './routes/forms.js';
 import billingRoutes from './routes/billing.js';
+import { validateEnv } from './utils/env.js';
+import { errorHandler } from './middleware/errorHandler.js';
 
 dotenv.config();
+const env = validateEnv();
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = env.PORT;
 
-app.use(cors());
-app.use(express.json());
+// Security Middleware
+app.use(helmet());
+app.use(cors({
+  origin: env.FRONTEND_URL,
+  credentials: true
+}));
+app.use(express.json({ limit: '1mb' }));
 
 // Routes
 app.use('/api/auth', authRoutes);
@@ -28,6 +37,8 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok' });
 });
 
+app.use(errorHandler);
+
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`Server running on port ${PORT} in ${env.NODE_ENV} mode`);
 });
