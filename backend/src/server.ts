@@ -28,25 +28,17 @@ app.use('/api/appointments', appointmentRoutes);
 app.use('/api/forms', formRoutes);
 app.use('/api/billing', billingRoutes);
 
-<<<<<<< HEAD
-app.get('/api/health', (_req, res) => {
-  res.json({ status: 'ok', mode: env.STORAGE_MODE, timestamp: new Date().toISOString() });
-});
-
-app.get('/api/ready', (_req, res) => {
-  res.json({ status: 'ready', mode: env.STORAGE_MODE });
-=======
 // Health check
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', storageAdapter: env.STORAGE_ADAPTER });
+=======
 >>>>>>> 0a3d8169160c949370332006f3066950243c45c3
 });
 
 app.use(errorHandler);
 
 app.listen(PORT, () => {
-<<<<<<< HEAD
-  console.log(`DentProSuite backend running on port ${PORT} in ${env.NODE_ENV} mode [storage: ${env.STORAGE_MODE}]`);
+  console.log(`Server running on port ${PORT} in ${env.NODE_ENV} mode using ${env.STORAGE_ADAPTER} adapter`);
 =======
   console.log(`Server running on port ${PORT} in ${env.NODE_ENV} mode using ${env.STORAGE_ADAPTER} adapter`);
 >>>>>>> 0a3d8169160c949370332006f3066950243c45c3

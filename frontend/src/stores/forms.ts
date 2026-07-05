@@ -1,7 +1,6 @@
 import { defineStore } from 'pinia';
 import type { FormTemplate, FormSubmission } from '../../../shared/types/index.js';
-<<<<<<< HEAD
-import { queueSyncRequest } from '../services/offlineStorage.js';
+import { DataService } from '../services/api';
 =======
 import { DataService } from '../services/api';
 >>>>>>> 0a3d8169160c949370332006f3066950243c45c3
@@ -29,25 +28,6 @@ export const useFormStore = defineStore('forms', {
       }
     },
     async submitForm(submission: any) {
-<<<<<<< HEAD
-        try {
-            const res = await fetch(`${API_URL}/forms/submissions`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(submission)
-            });
-            if (res.ok) {
-                return true;
-            }
-        } catch (error) {
-            await queueSyncRequest(
-              `${API_URL}/forms/submissions`,
-              'POST',
-              submission
-            );
-            return false;
-        }
-=======
       try {
         await submissionsService.create(submission);
         return true;
@@ -55,6 +35,9 @@ export const useFormStore = defineStore('forms', {
         console.error('Failed to submit form directly. Offline queue will handle it.', error);
         return false;
       }
+<<<<<<< HEAD
+>>>>>>> 0a3d8169160c949370332006f3066950243c45c3
+=======
 >>>>>>> 0a3d8169160c949370332006f3066950243c45c3
     }
   }

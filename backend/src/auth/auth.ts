@@ -1,7 +1,7 @@
 import jwt, { type SignOptions } from 'jsonwebtoken';
 import { getEnv } from '../utils/env.js';
 
-<<<<<<< HEAD
+import type { SignOptions } from 'jsonwebtoken';
 =======
 import type { SignOptions } from 'jsonwebtoken';
 

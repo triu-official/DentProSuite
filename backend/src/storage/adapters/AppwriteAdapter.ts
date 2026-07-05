@@ -1,28 +1,12 @@
 import { Client, Databases, ID, Query } from 'node-appwrite';
 import { StorageAdapter } from '../StorageAdapter.js';
 import { getEnv } from '../../utils/env.js';
-<<<<<<< HEAD
-import { Client, Databases, Query } from 'appwrite';
 =======
 >>>>>>> 0a3d8169160c949370332006f3066950243c45c3
 
 export class AppwriteAdapter<T extends { id: string }> implements StorageAdapter<T> {
   private collectionId: string;
   private databaseId: string;
-<<<<<<< HEAD
-  private databases: Databases;
-
-  constructor(collectionName: string) {
-    this.collectionId = collectionName;
-    const env = getEnv();
-    this.databaseId = env.APPWRITE_DATABASE_ID ?? '';
-
-    const client = new Client()
-      .setEndpoint(env.APPWRITE_ENDPOINT ?? '')
-      .setProject(env.APPWRITE_PROJECT_ID ?? '');
-
-    this.databases = new Databases(client);
-=======
   private client: Client;
   private databases: Databases;
 
@@ -38,6 +22,9 @@ export class AppwriteAdapter<T extends { id: string }> implements StorageAdapter
 
     // Fallback simple mapping, preferably collectionName maps exactly to collectionId
     this.collectionId = collectionName;
+<<<<<<< HEAD
+>>>>>>> 0a3d8169160c949370332006f3066950243c45c3
+=======
 >>>>>>> 0a3d8169160c949370332006f3066950243c45c3
   }
 
@@ -45,16 +32,6 @@ export class AppwriteAdapter<T extends { id: string }> implements StorageAdapter
     try {
       const response = await this.databases.listDocuments(
         this.databaseId,
-<<<<<<< HEAD
-        this.collectionId
-      );
-      return response.documents.map(doc => {
-        const { $id, $collectionId, $databaseId, $createdAt, $updatedAt, $permissions, ...rest } = doc;
-        return { id: $id, ...rest } as unknown as T;
-      });
-    } catch (error) {
-      console.error('AppwriteAdapter.getAll error:', error);
-=======
         this.collectionId,
         [Query.limit(100)]
       );
@@ -64,6 +41,9 @@ export class AppwriteAdapter<T extends { id: string }> implements StorageAdapter
       });
     } catch (error) {
       console.error(`Appwrite getAll failed for ${this.collectionId}:`, error);
+<<<<<<< HEAD
+>>>>>>> 0a3d8169160c949370332006f3066950243c45c3
+=======
 >>>>>>> 0a3d8169160c949370332006f3066950243c45c3
       return [];
     }
@@ -76,18 +56,15 @@ export class AppwriteAdapter<T extends { id: string }> implements StorageAdapter
         this.collectionId,
         id
       );
-<<<<<<< HEAD
-      const { $id, $collectionId, $databaseId, $createdAt, $updatedAt, $permissions, ...rest } = doc;
-      return { id: $id, ...rest } as unknown as T;
-    } catch (error) {
-      console.error('AppwriteAdapter.getById error:', error);
-=======
       const { $id, $createdAt, $updatedAt, $permissions, $databaseId, $collectionId, ...rest } = doc;
       return { id: $id, ...rest } as unknown as T;
     } catch (error: any) {
       if (error?.code !== 404) {
          console.error(`Appwrite getById failed for ${this.collectionId}:`, error);
       }
+<<<<<<< HEAD
+>>>>>>> 0a3d8169160c949370332006f3066950243c45c3
+=======
 >>>>>>> 0a3d8169160c949370332006f3066950243c45c3
       return undefined;
     }
@@ -99,16 +76,6 @@ export class AppwriteAdapter<T extends { id: string }> implements StorageAdapter
       const doc = await this.databases.createDocument(
         this.databaseId,
         this.collectionId,
-<<<<<<< HEAD
-        id,
-        data as Record<string, unknown>
-      );
-      const { $id, ...rest } = doc;
-      return { id: $id, ...rest } as unknown as T;
-    } catch (error) {
-      console.error('AppwriteAdapter.insert error:', error);
-      throw error;
-=======
         id || ID.unique(),
         data
       );
@@ -117,25 +84,15 @@ export class AppwriteAdapter<T extends { id: string }> implements StorageAdapter
     } catch (error) {
        console.error(`Appwrite insert failed for ${this.collectionId}:`, error);
        throw error;
+<<<<<<< HEAD
+>>>>>>> 0a3d8169160c949370332006f3066950243c45c3
+=======
 >>>>>>> 0a3d8169160c949370332006f3066950243c45c3
     }
   }
 
   async update(id: string, updates: Partial<T>): Promise<T | undefined> {
     try {
-<<<<<<< HEAD
-      const { id: _, ...data } = updates as any;
-      const doc = await this.databases.updateDocument(
-        this.databaseId,
-        this.collectionId,
-        id,
-        data as Record<string, unknown>
-      );
-      const { $id, ...rest } = doc;
-      return { id: $id, ...rest } as unknown as T;
-    } catch (error) {
-      console.error('AppwriteAdapter.update error:', error);
-=======
        // Omit id from updates if present
        const cleanUpdates = { ...updates };
        delete cleanUpdates.id;
@@ -150,25 +107,15 @@ export class AppwriteAdapter<T extends { id: string }> implements StorageAdapter
        return { id: $id, ...rest } as unknown as T;
     } catch (error) {
       console.error(`Appwrite update failed for ${this.collectionId}:`, error);
+<<<<<<< HEAD
+>>>>>>> 0a3d8169160c949370332006f3066950243c45c3
+=======
 >>>>>>> 0a3d8169160c949370332006f3066950243c45c3
       return undefined;
     }
   }
 
   async delete(id: string): Promise<boolean> {
-<<<<<<< HEAD
-    try {
-      await this.databases.deleteDocument(
-        this.databaseId,
-        this.collectionId,
-        id
-      );
-      return true;
-    } catch (error) {
-      console.error('AppwriteAdapter.delete error:', error);
-      return false;
-    }
-=======
      try {
        await this.databases.deleteDocument(
          this.databaseId,
@@ -180,6 +127,9 @@ export class AppwriteAdapter<T extends { id: string }> implements StorageAdapter
        console.error(`Appwrite delete failed for ${this.collectionId}:`, error);
        return false;
      }
+<<<<<<< HEAD
+>>>>>>> 0a3d8169160c949370332006f3066950243c45c3
+=======
 >>>>>>> 0a3d8169160c949370332006f3066950243c45c3
   }
 }

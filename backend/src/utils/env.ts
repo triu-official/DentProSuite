@@ -1,14 +1,11 @@
 import { z } from 'zod';
 import dotenv from 'dotenv';
 
-dotenv.config();
-
-const envSchema = z.object({
-  NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
-<<<<<<< HEAD
   PORT: z.coerce.number().default(3001),
   JWT_SECRET: z.string().min(16),
 =======
+const envSchema = z.object({
+  NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
   PORT: z.string().default('3000'),
   JWT_SECRET: z.string().min(10, 'JWT_SECRET must be at least 10 characters long'),
 >>>>>>> 0a3d8169160c949370332006f3066950243c45c3

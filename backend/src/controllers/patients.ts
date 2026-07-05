@@ -16,9 +16,7 @@ export const getPatients = async (req: Request, res: Response) => {
 
 export const getPatientById = async (req: Request, res: Response) => {
   try {
-<<<<<<< HEAD
-    const id = req.params.id;
-    if (typeof id !== 'string') return res.status(400).json({ error: 'Missing patient ID' });
+    const id = req.params.id as string;
 =======
     const id = req.params.id as string;
 >>>>>>> 0a3d8169160c949370332006f3066950243c45c3
@@ -46,9 +44,7 @@ export const createPatient = async (req: Request, res: Response) => {
 
 export const updatePatient = async (req: Request, res: Response) => {
   try {
-<<<<<<< HEAD
-    const id = req.params.id;
-    if (typeof id !== 'string') return res.status(400).json({ error: 'Missing patient ID' });
+    const id = req.params.id as string;
 =======
     const id = req.params.id as string;
 >>>>>>> 0a3d8169160c949370332006f3066950243c45c3

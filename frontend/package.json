@@ -13,7 +13,7 @@
     "@rolldown/binding-win32-x64-msvc": "^1.1.4",
     "@vitejs/plugin-vue-jsx": "^5.1.5",
     "appwrite": "^26.1.0",
-<<<<<<< HEAD
+    "axios": "^1.18.1",
 =======
     "axios": "^1.18.1",
 >>>>>>> 0a3d8169160c949370332006f3066950243c45c3
