@@ -1,32 +1,25 @@
 import { defineStore } from 'pinia';
 import type { Patient } from '../../../shared/types/index.js';
-import { useAuthStore } from './auth.js';
+import { DataService } from '../services/api';
 
-const API_URL = import.meta.env.VITE_API_URL + '/api';
+const patientsService = new DataService('/api/patients', 'patients');
 
 export const usePatientStore = defineStore('patients', {
   state: () => ({
     patients: [] as Patient[],
+    isLoading: false,
+    error: null as string | null,
   }),
   actions: {
     async fetchPatients() {
-      const auth = useAuthStore();
-      if (!auth.token) return;
+      this.isLoading = true;
+      this.error = null;
       try {
-        const res = await fetch(`${API_URL}/patients`, {
-          headers: { Authorization: `Bearer ${auth.token}` }
-        });
-        if (res.ok) {
-          this.patients = await res.json();
-          await import('../services/offlineStorage.js').then(m => m.cacheData('patients_list', this.patients));
-        }
-      } catch (err) {
-          await import('../services/offlineStorage.js').then(async m => {
-             const cached = await m.getCachedData('patients_list');
-             if (cached) {
-               this.patients = cached;
-             }
-          });
+        this.patients = await patientsService.getAll();
+      } catch (err: any) {
+        this.error = err.message || 'Failed to fetch patients';
+      } finally {
+        this.isLoading = false;
       }
     }
   }

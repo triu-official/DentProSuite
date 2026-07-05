@@ -16,6 +16,7 @@
     <main class="flex-grow p-4">
       <router-view></router-view>
     </main>
+    <SyncStatus />
   </div>
 </template>
 
@@ -24,10 +25,10 @@ import { ref, onMounted, onUnmounted } from 'vue';
 import { useAuthStore } from './stores/auth.js';
 import { useRouter } from 'vue-router';
 import { syncQueue } from './services/offlineStorage.js';
+import SyncStatus from './components/SyncStatus.vue';
 
 const auth = useAuthStore();
 const router = useRouter();
-
 const isOnline = ref(navigator.onLine);
 
 const updateOnlineStatus = () => {

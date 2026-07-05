@@ -1,22 +1,29 @@
 # DentProSuite
 
-DentProSuite is a role-based, offline-capable dental clinic management platform.
+A modular practice management system supporting dual modes: Appwrite integration or a purely localized SQLite-backed experience.
 
-It supports two operating models:
-- **Cloud Mode**: Vue frontend on Vercel + Appwrite backend capability.
-- **Local Mode**: Self-hosted Express backend leveraging a robust offline-capable local storage engine.
+## Quick Start (Local Full Stack)
 
-## Features
-- **Roles:** Admin, Dentist, Reception, and Patient workflows.
-- **Offline-first Foundation:** Workflows are persisted to a local sync queue when offline.
-- **Appointments & Billing:** Track daily summaries and patient schedules.
-- **Form Studio:** No-code intake and consent form builder.
+1. **Environment Setup**
+   Copy `.env.example` to `.env` in both `backend/` and `frontend/` and configure appropriately.
 
-## Documentation
-- [Architecture & Design](./ARCHITECTURE.md)
-- [Deployment & Configuration](./DEPLOYMENT.md)
-- [Mobile & Capacitor Readiness](./MOBILE.md)
+2. **Backend Setup**
+   ```bash
+   cd backend
+   npm install
+   npm run test
+   npm start # (or npm run dev if nodemon is setup)
+   ```
 
-## Quick Start
-1. `cd backend && npm install && npm start`
-2. `cd frontend && npm install && npm run dev`
+3. **Frontend Setup**
+   ```bash
+   cd frontend
+   npm install
+   npm run dev
+   ```
+
+## Key Architectural Decisions
+
+- **Storage Adapter**: The Express API routes data through a common `StorageAdapter` interface. By default, it will use `SqliteAdapter` allowing zero-configuration data retention. Setting `STORAGE_ADAPTER=appwrite` switches it to communicate directly with an Appwrite instance via `node-appwrite`.
+- **Offline Sync & PWA**: The Vue 3 app uses a specialized `DataService` capable of caching requests (IndexedDB) and queuing mutating actions when offline.
+- **Vercel Readiness**: The frontend includes `vercel.json` forcing Single Page Application routing, enabling one-click deploy to Vercel without a hard requirement on the backend (if using purely Appwrite or a remote deployed backend URL).

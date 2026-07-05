@@ -41,7 +41,8 @@ export const createAppointment = async (req: Request, res: Response) => {
 
 export const updateAppointment = async (req: Request, res: Response) => {
   try {
-    const updated = await dbAppointments.update(req.params.id, req.body);
+    const id = req.params.id as string;
+    const updated = await dbAppointments.update(id, req.body);
     if (!updated) return res.status(404).json({ error: 'Appointment not found' });
     res.json(updated);
   } catch (error) {

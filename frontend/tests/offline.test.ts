@@ -1,45 +1,35 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { saveOfflineSubmission, getOfflineSubmissions, removeOfflineSubmission, initDB } from '../src/services/offlineStorage.ts';
+import 'fake-indexeddb/auto';
+import { queueSyncRequest, getSyncQueue, clearSyncQueueItem, initDB } from '../src/services/offlineStorage';
 
 describe('Offline Storage Queue', () => {
   beforeEach(async () => {
     // Clear the idb object store before each test
     const db = await initDB();
-    const tx = db.transaction('offline-submissions', 'readwrite');
-    await tx.objectStore('offline-submissions').clear();
+    const tx = db.transaction('sync-queue', 'readwrite');
+    await tx.objectStore('sync-queue').clear();
   });
 
-  it('should save and retrieve a submission', async () => {
-    const dummySubmission = {
-      id: 'temp-1',
-      templateId: 't-1',
-      patientId: 'p-1',
-      data: { a: 1 },
-      submittedAt: new Date().toISOString()
-    } as any;
+  it('should queue a sync request and retrieve it', async () => {
+    const payload = { templateId: '123', answers: { q1: 'yes' } };
+    await queueSyncRequest('/api/test', 'POST', payload);
 
-    await saveOfflineSubmission(dummySubmission);
-    const results = await getOfflineSubmissions();
-
-    expect(results.length).toBe(1);
-    expect(results[0].templateId).toBe('t-1');
+    const queuedItems = await getSyncQueue();
+    expect(queuedItems.length).toBe(1);
+    expect(queuedItems[0].url).toContain('/api/test');
+    expect(queuedItems[0].method).toBe('POST');
+    expect(queuedItems[0].body).toEqual(payload);
   });
 
-  it('should remove a submission', async () => {
-    const dummySubmission = {
-      id: 'temp-2',
-      templateId: 't-2',
-      patientId: 'p-2',
-      data: {},
-      submittedAt: new Date().toISOString()
-    } as any;
+  it('should remove a sync item', async () => {
+    await queueSyncRequest('/api/test', 'POST', { q: 1 });
+    let queuedItems = await getSyncQueue();
+    expect(queuedItems.length).toBe(1);
 
-    await saveOfflineSubmission(dummySubmission);
-    let results = await getOfflineSubmissions();
-    expect(results.length).toBe(1);
+    const itemId = queuedItems[0].id!;
+    await clearSyncQueueItem(itemId);
 
-    await removeOfflineSubmission('temp-2');
-    results = await getOfflineSubmissions();
-    expect(results.length).toBe(0);
+    queuedItems = await getSyncQueue();
+    expect(queuedItems.length).toBe(0);
   });
 });

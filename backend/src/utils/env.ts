@@ -1,35 +1,35 @@
 import { z } from 'zod';
 
-export const envSchema = z.object({
+const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
-  PORT: z.string().transform(Number).default('3001'),
-  JWT_SECRET: z.string().min(16),
+  PORT: z.string().default('3000'),
+  JWT_SECRET: z.string().min(10, 'JWT_SECRET must be at least 10 characters long'),
   FRONTEND_URL: z.string().url().default('http://localhost:5173'),
-  STORAGE_MODE: z.enum(['local', 'appwrite']).default('local'),
 
-  // Appwrite configuration (required if STORAGE_MODE === 'appwrite')
+  // Storage settings
+  STORAGE_ADAPTER: z.enum(['local', 'local-json', 'appwrite']).default('local'),
+
+  // Appwrite configuration (only required if STORAGE_ADAPTER is appwrite)
   APPWRITE_ENDPOINT: z.string().url().optional(),
   APPWRITE_PROJECT_ID: z.string().optional(),
   APPWRITE_API_KEY: z.string().optional(),
   APPWRITE_DATABASE_ID: z.string().optional(),
-}).superRefine((data, ctx) => {
-  if (data.STORAGE_MODE === 'appwrite') {
-    const requiredAppwriteVars = ['APPWRITE_ENDPOINT', 'APPWRITE_PROJECT_ID', 'APPWRITE_API_KEY', 'APPWRITE_DATABASE_ID'] as const;
-    for (const v of requiredAppwriteVars) {
-      if (!data[v]) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: `${v} is required when STORAGE_MODE is 'appwrite'`,
-          path: [v]
-        });
-      }
-    }
+}).refine(data => {
+  if (data.STORAGE_ADAPTER === 'appwrite') {
+    return !!(data.APPWRITE_ENDPOINT && data.APPWRITE_PROJECT_ID && data.APPWRITE_API_KEY && data.APPWRITE_DATABASE_ID);
   }
+  return true;
+}, {
+  message: "Appwrite configuration is required when STORAGE_ADAPTER is 'appwrite'",
 });
 
-let _env: z.infer<typeof envSchema>;
+export type EnvConfig = z.infer<typeof envSchema>;
 
-export function validateEnv() {
+let cachedEnv: EnvConfig;
+
+export function validateEnv(): EnvConfig {
+  if (cachedEnv) return cachedEnv;
+
   const parsed = envSchema.safeParse(process.env);
 
   if (!parsed.success) {
@@ -37,13 +37,11 @@ export function validateEnv() {
     process.exit(1);
   }
 
-  _env = parsed.data;
-  return _env;
+  cachedEnv = parsed.data;
+  return cachedEnv;
 }
 
-export function getEnv() {
-  if (!_env) {
-    return validateEnv();
-  }
-  return _env;
+export function getEnv(): EnvConfig {
+  if (!cachedEnv) return validateEnv();
+  return cachedEnv;
 }

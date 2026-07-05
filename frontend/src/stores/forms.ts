@@ -1,46 +1,37 @@
 import { defineStore } from 'pinia';
 import type { FormTemplate, FormSubmission } from '../../../shared/types/index.js';
+import { DataService } from '../services/api';
 
-const API_URL = import.meta.env.VITE_API_URL + '/api';
+const templatesService = new DataService('/api/forms/templates', 'formTemplates');
+const submissionsService = new DataService('/api/forms/submissions', 'formSubmissions');
 
 export const useFormStore = defineStore('forms', {
   state: () => ({
     templates: [] as FormTemplate[],
     submissions: [] as FormSubmission[],
+    isLoading: false,
+    error: null as string | null,
   }),
   actions: {
     async fetchTemplates() {
+      this.isLoading = true;
+      this.error = null;
       try {
-        const res = await fetch(`${API_URL}/forms/templates`);
-        if (res.ok) {
-          this.templates = await res.json();
-          localStorage.setItem('cachedTemplates', JSON.stringify(this.templates));
-        }
-      } catch (err) {
-        const cached = localStorage.getItem('cachedTemplates');
-        if (cached) {
-            this.templates = JSON.parse(cached);
-        }
+        this.templates = await templatesService.getAll();
+      } catch (err: any) {
+        this.error = err.message || 'Failed to fetch form templates';
+      } finally {
+        this.isLoading = false;
       }
     },
     async submitForm(submission: any) {
-        try {
-            const res = await fetch(`${API_URL}/forms/submissions`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(submission)
-            });
-            if (res.ok) {
-                return true;
-            }
-        } catch (error) {
-            await import('../services/offlineStorage.ts').then(m => m.queueSyncRequest(
-              `${API_URL}/forms/submissions`,
-              'POST',
-              submission
-            ));
-            return false;
-        }
+      try {
+        await submissionsService.create(submission);
+        return true;
+      } catch (error) {
+        console.error('Failed to submit form directly. Offline queue will handle it.', error);
+        return false;
+      }
     }
   }
 });

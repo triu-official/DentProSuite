@@ -64,7 +64,7 @@ export class LocalJsonAdapter<T extends { id: string }> implements StorageAdapte
     const index = all.findIndex(item => item.id === id);
     if (index === -1) return undefined;
 
-    all[index] = { ...all[index], ...updates };
+    all[index] = { ...all[index], ...updates } as T;
     await writeJson(this.filename, all);
     return all[index];
   }

@@ -1,7 +1,8 @@
 import { openDB } from 'idb';
 import type { DBSchema, IDBPDatabase } from 'idb';
+import axios from 'axios';
 
-interface SyncQueueItem {
+export interface SyncQueueItem {
   id?: number;
   url: string;
   method: string;
@@ -56,11 +57,19 @@ export async function getCachedData(key: string) {
 // ------------------------------------------------------------------
 export async function queueSyncRequest(url: string, method: string, body: any, headers: any = {}) {
   const db = await initDB();
+
+  // Try to clean up URL formatting since DataService might just pass relative paths
+  const targetUrl = url.startsWith('http') ? url : `${import.meta.env.VITE_API_URL || ''}${url.startsWith('/') ? '' : '/'}${url}`;
+
+  // Attach current auth token
+  const token = localStorage.getItem('token');
+  const authHeaders = token ? { Authorization: `Bearer ${token}` } : {};
+
   await db.add('sync-queue', {
-    url,
+    url: targetUrl,
     method,
     body,
-    headers,
+    headers: { ...authHeaders, ...headers },
     timestamp: Date.now()
   });
 
@@ -86,24 +95,26 @@ export async function syncQueue() {
 
   for (const item of items) {
     try {
-      const res = await fetch(item.url, {
-        method: item.method,
-        headers: {
-          'Content-Type': 'application/json',
-          ...(item.headers || {})
-        },
-        body: JSON.stringify(item.body)
+      // Push via backend
+      const res = await axios({
+         url: item.url,
+         method: item.method,
+         data: item.body,
+         headers: item.headers
       });
 
-      if (res.ok || res.status >= 400) {
-        // If it succeeds or permanently fails (e.g., 400 Bad Request), remove from queue.
-        if (item.id) {
-          await clearSyncQueueItem(item.id);
-        }
+      if (res.status >= 200 && res.status < 300) {
+        if (item.id) await clearSyncQueueItem(item.id);
       }
-    } catch (err) {
-      // Network error, keep in queue and break.
-      break;
+    } catch (err: any) {
+      if (err.response && err.response.status >= 400 && err.response.status < 500) {
+        // Permanent failure (e.g. validation error) - clear from queue to prevent block
+        if (item.id) await clearSyncQueueItem(item.id);
+      } else {
+        // Network error / Server 500 - keep in queue but DO NOT break,
+        // to allow independent queue items a chance to attempt.
+        console.warn('Sync failed due to network/server, keeping in queue', err);
+      }
     }
   }
 }

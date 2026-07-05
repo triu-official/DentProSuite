@@ -36,3 +36,4 @@ yarn-error.log*
 next-env.d.ts
 frontend/node_modules
 backend/node_modules
+data/dentpro.sqlite

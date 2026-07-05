@@ -15,7 +15,7 @@ export const requireAuth = (req: AuthRequest, res: Response, next: NextFunction)
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
-  const token = authHeader.split(' ')[1];
+  const token = authHeader.split(' ')[1] as string;
   const decoded = verifyToken(token) as { id: string; role: UserRole } | null;
 
   if (!decoded) {

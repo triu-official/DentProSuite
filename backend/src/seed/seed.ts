@@ -57,9 +57,9 @@ async function seed() {
     isActive: true,
     createdAt: new Date().toISOString(),
     fields: [
-      { id: 'f1', type: 'text', label: 'Full Name', required: true },
-      { id: 'f2', type: 'checkbox', label: 'Have you had dental surgery before?', required: false },
-      { id: 'f3', type: 'signature', label: 'Signature', required: true }
+      { id: 'f1', type: 'text', label: 'Full Name', required: true } as any,
+      { id: 'f2', type: 'checkbox', label: 'Have you had dental surgery before?', required: false } as any,
+      { id: 'f3', type: 'signature', label: 'Signature', required: true } as any
     ]
   });
 
@@ -70,13 +70,13 @@ async function seed() {
     isActive: true,
     createdAt: new Date().toISOString(),
     fields: [
-      { id: 'f1', type: 'text', label: 'Procedure Name', required: true },
-      { id: 'f2', type: 'signature', label: 'Patient Signature', required: true }
+      { id: 'f1', type: 'text', label: 'Procedure Name', required: true } as any,
+      { id: 'f2', type: 'signature', label: 'Patient Signature', required: true } as any
     ]
   });
 
   // 5. Appointments (Sample)
-  const today = new Date().toISOString().split('T')[0];
+  const today = new Date().toISOString().split('T')[0] as string;
   await dbAppointments.insert({
     id: 'appt-1',
     patientId: 'patient-1',
@@ -87,7 +87,8 @@ async function seed() {
     endTime: '10:00',
     status: 'SCHEDULED',
     services: [],
-    createdAt: new Date().toISOString()
+    createdAt: new Date().toISOString(),
+    notes: ''
   });
 
   await dbAppointments.insert({
@@ -100,7 +101,8 @@ async function seed() {
     endTime: '11:00',
     status: 'COMPLETED',
     services: [],
-    createdAt: new Date().toISOString()
+    createdAt: new Date().toISOString(),
+    notes: ''
   });
 
   console.log('Seed data generated.');

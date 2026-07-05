@@ -1,67 +1,43 @@
 import { defineStore } from 'pinia';
 import type { Appointment } from '../../../shared/types/index.js';
-import { useAuthStore } from './auth.js';
+import { DataService } from '../services/api';
 
-const API_URL = import.meta.env.VITE_API_URL + '/api';
+const appointmentsService = new DataService('/api/appointments', 'appointments');
 
 export const useAppointmentStore = defineStore('appointments', {
   state: () => ({
     appointments: [] as Appointment[],
+    isLoading: false,
+    error: null as string | null,
   }),
   actions: {
     async fetchAppointments(date?: string, dentistId?: string) {
-      const auth = useAuthStore();
-      if (!auth.token) return;
-
-      let url = `${API_URL}/appointments?`;
-      if (date) url += `date=${date}&`;
-      if (dentistId) url += `dentistId=${dentistId}`;
-
+      this.isLoading = true;
+      this.error = null;
       try {
-        const res = await fetch(url, {
-          headers: { Authorization: `Bearer ${auth.token}` }
-        });
-        if (res.ok) {
-          this.appointments = await res.json();
-          localStorage.setItem('cachedAppointments', JSON.stringify(this.appointments));
-        }
-      } catch (err) {
-        const cached = localStorage.getItem('cachedAppointments');
-        if (cached) {
-          this.appointments = JSON.parse(cached);
-        }
+        const params: any = {};
+        if (date) params.date = date;
+        if (dentistId) params.dentistId = dentistId;
+
+        this.appointments = await appointmentsService.getAll(params);
+      } catch (err: any) {
+         this.error = err.message || 'Failed to fetch appointments';
+      } finally {
+        this.isLoading = false;
       }
     },
+
     async updateStatus(id: string, status: string) {
+       // Optimistic update
        const index = this.appointments.findIndex(a => a.id === id);
        if (index !== -1) {
            this.appointments[index].status = status as any;
        }
-       const auth = useAuthStore();
 
        try {
-         const res = await fetch(`${API_URL}/appointments/${id}`, {
-           method: 'PUT',
-           headers: {
-             'Content-Type': 'application/json',
-             Authorization: `Bearer ${auth.token}`
-           },
-           body: JSON.stringify({ status })
-         });
-
-         if (!res.ok) throw new Error('Network error');
-         // Update cache on success
-         localStorage.setItem('cachedAppointments', JSON.stringify(this.appointments));
+         await appointmentsService.update(id, { status });
        } catch (err) {
-         // Queue offline sync
-         await import('../services/offlineStorage.js').then(m => m.queueSyncRequest(
-           `${API_URL}/appointments/${id}`,
-           'PUT',
-           { status },
-           { Authorization: `Bearer ${auth.token}` }
-         ));
-         // Update cache anyway to reflect local optimism
-         localStorage.setItem('cachedAppointments', JSON.stringify(this.appointments));
+         console.warn('Update failed, optimistic state preserved or sync queued.', err);
        }
     }
   }
