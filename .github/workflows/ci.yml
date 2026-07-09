@@ -17,7 +17,13 @@ jobs:
           node-version: 22
           cache: npm
           cache-dependency-path: backend/package-lock.json
-      - run: npm ci
+      # Zod is a dependency of `shared` and needed for typechecking.
+      # To run `npm ci` on backend, we first need to ensure `shared` is installed too
+      - name: Install shared dependencies
+        run: npm ci
+        working-directory: shared
+      - name: Install backend dependencies
+        run: npm ci
       - run: npm run typecheck
       - run: npm test
   frontend:
@@ -32,7 +38,12 @@ jobs:
           node-version: 22
           cache: npm
           cache-dependency-path: frontend/package-lock.json
-      - run: npm ci
+      # Same for frontend, plus the peer dependencies flag
+      - name: Install shared dependencies
+        run: npm ci
+        working-directory: shared
+      - name: Install frontend dependencies
+        run: npm ci --legacy-peer-deps
       - run: npx vue-tsc --noEmit
       - run: npm test
       - run: npm run build

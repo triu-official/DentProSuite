@@ -17,7 +17,7 @@
         </div>
       </div>
     </header>
-    <main class="flex-grow p-4">
+    <main class="flex-grow p-4" v-if="authLoaded">
       <router-view />
     </main>
     <SyncStatus />
@@ -36,6 +36,7 @@ const auth = useAuthStore();
 const router = useRouter();
 const isOnline = ref(navigator.onLine);
 const syncCount = ref(0);
+const authLoaded = ref(false);
 
 const updateOnlineStatus = async () => {
   isOnline.value = navigator.onLine;
@@ -57,6 +58,14 @@ const updateSyncCount = async () => {
 let syncInterval: ReturnType<typeof setInterval> | null = null;
 
 onMounted(async () => {
+  if (auth.token && !auth.user) {
+    await auth.fetchMe();
+    if (!auth.user) {
+      router.push('/login');
+    }
+  }
+  authLoaded.value = true;
+
   window.addEventListener('online', updateOnlineStatus);
   window.addEventListener('offline', updateOnlineStatus);
   updateSyncCount();

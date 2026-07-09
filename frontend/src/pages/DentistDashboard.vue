@@ -35,7 +35,8 @@ const appointments = useAppointmentStore();
 const filterDate = ref(new Date().toISOString().split('T')[0]);
 
 const loadSchedule = () => {
-  appointments.fetchAppointments({ date: filterDate.value, dentistId: auth.user?.id });
+  const dentistId = auth.user ? auth.user.id : undefined;
+  appointments.fetchAppointments({ date: filterDate.value, dentistId });
 };
 
 const onStatusChanged = async (id: string, status: string) => {
