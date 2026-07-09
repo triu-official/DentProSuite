@@ -4,12 +4,22 @@ A modular dental practice management system supporting dual modes: Appwrite clou
 
 ## Prerequisites
 
-- **Node.js >= 18.0.0** (tested with 18.x, 20.x, 22.x)
+- **Node.js >= 20.0.0**
 - npm >= 9.x
 
 ## Quick Start (Local Full Stack)
 
-### 1. Environment Setup
+This repository uses **npm workspaces** to manage packages efficiently.
+
+### 1. Installation
+
+Run this from the **root directory**:
+
+```bash
+npm install
+```
+
+### 2. Environment Setup
 
 ```bash
 # Backend
@@ -18,26 +28,26 @@ cp backend/.env.example backend/.env
 cp frontend/.env.example frontend/.env
 ```
 
-Edit the `.env` files as needed. Defaults work for local development.
+Edit the `.env` files as needed. Defaults work out of the box for local development.
 
-### 2. Backend Setup
+### 3. Backend Setup
+
+From the **root directory**:
 
 ```bash
-cd backend
-npm install
-npm run seed        # (optional) seed demo data
-npm run typecheck   # verify types
-npm run test        # run tests
-npm run dev         # start dev server on :3001
+npm run seed -w backend        # (optional) seed demo data
+npm run typecheck -w backend   # verify types
+npm run test -w backend        # run tests
+npm run dev -w backend         # start dev server on :3001
 ```
 
-### 3. Frontend Setup
+### 4. Frontend Setup
+
+From the **root directory** in a new terminal:
 
 ```bash
-cd frontend
-npm install
-npm run test         # run tests
-npm run dev          # start dev server on :5173
+npm run test -w frontend       # run tests
+npm run dev -w frontend        # start dev server on :5173
 ```
 
 ## Project Structure

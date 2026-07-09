@@ -3,7 +3,10 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "dependencies": {
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "peerDependencies": {
     "zod": "^4.4.3"
   }
 }

@@ -1,7 +1,7 @@
 import fs from 'fs/promises';
 import path from 'path';
 
-const DATA_DIR = path.join(process.cwd(), '../data');
+const DATA_DIR = path.join(process.cwd(), process.cwd().endsWith('backend') ? '../data' : 'data');
 
 export async function ensureDataDirExists() {
   try {

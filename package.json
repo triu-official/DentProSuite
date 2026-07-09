@@ -1,14 +1,21 @@
 {
+  "name": "dentprosuite",
   "private": true,
+  "workspaces": [
+    "backend",
+    "frontend",
+    "shared"
+  ],
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "devDependencies": {
     "@types/node": "^22.15.3",
     "tsx": "^4.23.0",
-    "typescript": "~5.7.0"
+    "typescript": "~5.7.0",
+    "vitest": "^2.1.8"
   },
   "dependencies": {
     "zod": "^4.4.3"
-  },
-  "engines": {
-    "node": ">=18.0.0"
   }
 }
